@@ -28,6 +28,9 @@ Game =
   ballVeloY: 1
   ballRadius: 10
 
+  paddleBounces: 0
+  wallBounces: 0
+
 #===============================================================================
   getCursorPosition: (e) =>
     if e.pageX != undefined && e.pageY != undefined
@@ -45,6 +48,11 @@ Game =
       y: y
 
     return point
+
+#===============================================================================
+  refreshBounces: () =>
+    document.getElementById("paddleBounces").innerHTML = Game.paddleBounces
+    document.getElementById("wallBounces").innerHTML = Game.wallBounces
 
 #===============================================================================
   onClick: (e) =>
@@ -107,10 +115,14 @@ Game =
       if Game.ballX > Game.canvas.width
         Game.ballX = Game.canvas.width - Game.ballRadius
         Game.ballVeloX = -1 * Game.ballVeloX
+        Game.wallBounces++
+        Game.refreshBounces()
 
       if Game.ballX < 0
         Game.ballX = Game.ballRadius
         Game.ballVeloX = -1 * Game.ballVeloX
+        Game.wallBounces++
+        Game.refreshBounces()
 
       if Game.ballY > Game.canvas.height
         Game.ballExists = false
@@ -118,6 +130,8 @@ Game =
       if Game.ballY+Game.ballRadius < 0
         Game.ballY = Game.ballRadius
         Game.ballVeloY = -1 * Game.ballVeloY
+        Game.wallBounces++
+        Game.refreshBounces()
 
       # ball bounce from paddle
       if (Game.ballY > Game.canvas.height - (Game.paddleHeight + Game.ballRadius) &&
@@ -125,6 +139,8 @@ Game =
           Game.ballX < Game.paddleX + Game.paddleWidth)
         Game.ballY = Game.canvas.height - (Game.paddleHeight + Game.ballRadius)
         Game.ballVeloY = -1
+        Game.paddleBounces++
+        Game.refreshBounces()
         if Game.paddleVelocity != 0
           Game.ballVeloX += (Game.paddleVelocity*0.1)
 
