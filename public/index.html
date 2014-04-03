@@ -6,9 +6,22 @@
     <script src="less-1.7.0.min.js"></script>
   </head>
   <body>
-    Wall Bounces: <span id="wallBounces">0</span><br/>
-    Paddle Bounces: <span id="paddleBounces">0</span><br/>
-    <canvas id="canvas" width="640" height="480"></canvas>
+    <div id="canvas-div">
+      <h2>A Bouncing Ball (Breakout without blocks)</h2>
+      <p>
+        Wall Bounces: <span id="wallBounces">0</span>
+      </p>
+      <p>
+        Paddle Bounces: <span id="paddleBounces">0</span>
+      </p>
+      <canvas id="canvas" width="640" height="480"></canvas>
+      <label>
+        <input type="checkbox" id="rainbow-box" /> Rainbow Colors
+      </label>
+      <label>
+        <input type="checkbox" id="trail-box" /> Show Trails
+      </label>
+    </div>
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="main.coffee" type="text/coffeescript"></script>

@@ -2,6 +2,8 @@ canvas = document.getElementById 'canvas'
 context = canvas.getContext '2d'
 
 blockTypes = [ 'none', '#f00', '#0f0', '#00f']
+fillStyles = [ '#fff', '#f00', '#0f0', '#00f', '#000']
+lines = []
 
 #===============================================================================
 #===============================================================================
@@ -31,6 +33,9 @@ Game =
   paddleBounces: 0
   wallBounces: 0
 
+  enableTrails: false
+  enableRainbowBall: false
+
 #===============================================================================
   getCursorPosition: (e) =>
     if e.pageX != undefined && e.pageY != undefined
@@ -55,7 +60,30 @@ Game =
     document.getElementById("wallBounces").innerHTML = Game.wallBounces
 
 #===============================================================================
+  addTracer: () =>
+    line =
+      sx: Game.ballX + (Game.ballVeloX * Game.ballSpeed * 4000)
+      sy: Game.ballY + (Game.ballVeloY * Game.ballSpeed * 4000)
+      ex: Game.ballX + (Game.ballVeloX * Game.ballSpeed * -4000)
+      ey: Game.ballY + (Game.ballVeloY * Game.ballSpeed * -4000)
+
+    lines.push line
+
+#===============================================================================
+  drawTracer: (line) =>
+    Game.context.beginPath()
+    if Game.enableRainbowBall
+      Game.context.strokeStyle = fillStyles[(Game.wallBounces % 4) + 1]
+    else
+      Game.context.strokeStyle = '#000'
+    Game.context.moveTo line.sx, line.sy
+    Game.context.lineTo line.ex, line.ey
+    Game.context.stroke()
+
+#===============================================================================
   onClick: (e) =>
+    if !Game.ballExists
+      Game.restart()
 
 #===============================================================================
   onKeyDown: (e) =>
@@ -117,12 +145,14 @@ Game =
         Game.ballVeloX = -1 * Game.ballVeloX
         Game.wallBounces++
         Game.refreshBounces()
+        Game.addTracer()
 
       if Game.ballX < 0
         Game.ballX = Game.ballRadius
         Game.ballVeloX = -1 * Game.ballVeloX
         Game.wallBounces++
         Game.refreshBounces()
+        Game.addTracer()
 
       if Game.ballY > Game.canvas.height
         Game.ballExists = false
@@ -132,6 +162,7 @@ Game =
         Game.ballVeloY = -1 * Game.ballVeloY
         Game.wallBounces++
         Game.refreshBounces()
+        Game.addTracer()
 
       # ball bounce from paddle
       if (Game.ballY > Game.canvas.height - (Game.paddleHeight + Game.ballRadius) &&
@@ -141,6 +172,7 @@ Game =
         Game.ballVeloY = -1
         Game.paddleBounces++
         Game.refreshBounces()
+        Game.addTracer()
         if Game.paddleVelocity != 0
           Game.ballVeloX += (Game.paddleVelocity*0.1)
 
@@ -149,21 +181,47 @@ Game =
 
 #===============================================================================
   draw: () =>
-    Game.canvas.width = Game.canvas.width #weird code to clear the screen, but it works
+    Game.canvas.width = Game.canvas.width #<- weird code to clear the screen, but it works
 
     Game.context.fillRect Game.paddleX, Game.canvas.height - Game.paddleHeight, Game.paddleWidth, Game.paddleHeight
+
+    if Game.enableTrails
+      Game.drawTracer(line) for line in lines
 
     if Game.ballExists
       Game.context.beginPath()
       Game.context.arc Game.ballX, Game.ballY, Game.ballRadius, 0, Math.PI*2
+      if Game.enableRainbowBall
+        Game.context.fillStyle = fillStyles[Game.wallBounces % 5]
+      else
+        Game.context.fillStyle = '#fff'
+      Game.context.fill()
+      Game.context.strokeStyle = '#000'
       Game.context.stroke()
+    else
+      Game.context.font = '14pt Arial'
+      Game.context.textAlign = 'center'
+      Game.context.fillStyle = '#000'
+      Game.context.fillText 'Game Over.  Click to restart.', 320, 240
 
 #===============================================================================
   run: () =>
     @loops = 0
 
+    Game.enableRainbowBall = $("#rainbow-box").prop("checked")
+    Game.enableTrails = $("#trail-box").prop("checked")
+
     Game.update()
     Game.draw()
+
+#===============================================================================
+  restart: () =>
+    Game.ballX = Game.canvas.width/2
+    Game.ballY = Game.canvas.height/2
+    Game.ballExists = true
+    Game.veloX = 0.4
+    Game.veloY = 1
+    lines.length = 0
 
 #===============================================================================
 #===============================================================================
